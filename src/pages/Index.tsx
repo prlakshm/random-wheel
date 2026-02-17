@@ -9,7 +9,7 @@ const Index = () => {
   const [spinning, setSpinning] = useState(false);
 
   const fancyButton =
-    "inline-flex items-center rounded-md font-bold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100";
+    "inline-flex items-center rounded-md font-semibold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100";
 
 
   const addName = () => {
