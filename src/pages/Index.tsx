@@ -8,6 +8,10 @@ const Index = () => {
   const [showResult, setShowResult] = useState(false);
   const [spinning, setSpinning] = useState(false);
 
+  const fancyButton =
+    "inline-flex items-center rounded-md font-bold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100";
+
+
   const addName = () => {
     const trimmed = inputValue.trim();
     if (trimmed && !names.includes(trimmed)) {
@@ -41,7 +45,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-8">
       {/* Header */}
-      <header className="mt-2 mb-8 text-center">
+      <header className="mt-2 mb-6 text-center">
         <h1 className="text-4xl font-bold text-primary md:text-5xl">
           Spin the Wheel!
         </h1>
@@ -52,12 +56,12 @@ const Index = () => {
 
       {/* Wheel */}
       <div className="mb-6">
-      <SpinWheel
-        names={names}
-        spinning={spinning}
-        onResult={handleResult}
-      />
-    </div>
+        <SpinWheel
+          names={names}
+          spinning={spinning}
+          onResult={handleResult}
+        />
+      </div>
 
       {/* Result */}
       {showResult && result && (
@@ -67,14 +71,15 @@ const Index = () => {
       )}
 
       {/* Spin Button */}
-    <button
-      onClick={handleSpin}
-      disabled={names.length < 2 || spinning}
-      className="mb-6 inline-flex items-center rounded-md px-8 py-4 text-xl font-bold text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
-      style={{ background: "var(--gradient-spin)" }}
-    >
-      🎯 SPIN THE WHEEL! 🎯
-    </button>
+      <button
+        onClick={handleSpin}
+        disabled={names.length < 2 || spinning}
+        className={`${fancyButton} mb-6 px-8 py-4 text-xl`}
+        style={{ background: "var(--gradient-spin)" }}
+      >
+        🎯 SPIN THE WHEEL! 🎯
+      </button>
+
 
       {/* Input */}
       <div className="flex w-full max-w-md gap-3">
@@ -88,10 +93,13 @@ const Index = () => {
         />
         <button
           onClick={addName}
-          className="rounded-lg bg-accent px-6 py-3 font-semibold text-accent-foreground transition-all hover:scale-105 active:scale-95"
+          disabled={!inputValue.trim()}
+          className={`${fancyButton} px-6 py-3`}
+          style={{ background: "var(--gradient-spin)" }}
         >
           + Add
         </button>
+
       </div>
 
       {/* Name List */}
@@ -100,7 +108,7 @@ const Index = () => {
           {names.map((name) => (
             <span
               key={name}
-              className="flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm font-medium text-foreground"
+              className="flex items-center gap-1 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 px-3 py-1 text-sm font-medium text-foreground border-2 border-primary/20 shadow-sm hover:shadow-md transition-all hover:scale-105"
             >
               {name}
               <button

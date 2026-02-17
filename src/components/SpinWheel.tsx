@@ -64,6 +64,43 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
       );
     }
 
+    if (names.length === 1) {
+      // Position text off-center (right side)
+      const tx = center + radius * 0.5;
+      const ty = center;
+
+      return (
+        <>
+          {/* Full circle */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill={COLORS[0]}
+          />
+
+          {/* Name label off to the side */}
+          <text
+            x={tx}
+            y={ty}
+            fill="white"
+            fontSize={16}
+            fontWeight="600"
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{
+              fontFamily: "Fredoka, sans-serif",
+              textShadow: "0 1px 2px rgba(0,0,0,0.25)",
+            }}
+          >
+            {names[0].length > 12 ? names[0].slice(0, 11) + "…" : names[0]}
+          </text>
+        </>
+      );
+    }
+
+
+
     const segmentAngle = 360 / names.length;
 
     return names.map((name, i) => {
