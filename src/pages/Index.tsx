@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import SpinWheel from "@/components/SpinWheel";
 
 const Index = () => {
-  const [names, setNames] = useState<string[]>(["pranavi", "nayani", "Jake", "Nathan", "arjun"]);
+  const [names, setNames] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -41,36 +41,40 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-8">
       {/* Header */}
-      <header className="mb-8 text-center">
+      <header className="mt-2 mb-8 text-center">
         <h1 className="text-4xl font-bold text-primary md:text-5xl">
-          🎡 Spin the Wheel! 🎉
+          Spin the Wheel!
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Add names and let fate decide
+          And let fate decide...
         </p>
       </header>
 
       {/* Wheel */}
       <div className="mb-6">
-        <SpinWheelWrapper names={names} onResult={handleResult} spinning={spinning} />
-      </div>
+      <SpinWheel
+        names={names}
+        spinning={spinning}
+        onResult={handleResult}
+      />
+    </div>
 
       {/* Result */}
       {showResult && result && (
         <div className="mb-4 animate-bounce rounded-lg bg-primary px-6 py-3 text-xl font-bold text-primary-foreground shadow-lg">
-          🎉 {result} wins! 🎉
+          🎉 {result}! 🎉
         </div>
       )}
 
       {/* Spin Button */}
-      <button
-        onClick={handleSpin}
-        disabled={names.length < 2 || spinning}
-        className="mb-8 rounded-full px-10 py-4 text-xl font-bold text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
-        style={{ background: "var(--gradient-spin)" }}
-      >
-        🎯 SPIN THE WHEEL! 🎯
-      </button>
+    <button
+      onClick={handleSpin}
+      disabled={names.length < 2 || spinning}
+      className="mb-6 inline-flex items-center rounded-md px-8 py-4 text-xl font-bold text-primary-foreground shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+      style={{ background: "var(--gradient-spin)" }}
+    >
+      🎯 SPIN THE WHEEL! 🎯
+    </button>
 
       {/* Input */}
       <div className="flex w-full max-w-md gap-3">
