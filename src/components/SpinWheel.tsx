@@ -19,6 +19,9 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
+  // ⭐ New: animate removal
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
+
   const size = 320;
   const center = size / 2;
   const radius = size / 2 - 10;
@@ -41,45 +44,59 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
 
       // Pointer is on the RIGHT side
       const pointerAngle = (360 - finalAngle + 90) % 360;
-      const idx =
-        Math.floor(pointerAngle / segmentAngle) % names.length;
+      const idx = Math.floor(pointerAngle / segmentAngle) % names.length;
 
-      onResult(names[idx]);
-      setIsSpinning(false);
+      const winner = names[idx];
+
+      // ⭐ Animate slice disappearing first
+      setRemovingIndex(idx);
+
+      // Remove winner after fade animation
+      setTimeout(() => {
+        onResult(winner);
+        setRemovingIndex(null);
+        setIsSpinning(false);
+      }, 600);
     }, 4000);
   }, [isSpinning, names, rotation, onResult]);
 
   // ✅ Trigger spin when parent sets spinning=true
   useEffect(() => {
-    if (spinning) {
-      spinWheel();
-    }
-  }, [spinning, spinWheel]);
+  if (spinning && !isSpinning) {
+    spinWheel();
+  }
+}, [spinning, isSpinning, spinWheel]);
+
 
   // ✅ Render wheel segments
   const renderSegments = () => {
     if (names.length === 0) {
       return (
-        <circle cx={center} cy={center} r={radius} fill="#eee" />
+        <circle
+          cx={center}
+          cy={center}
+          r={radius}
+          fill="#eee"
+        />
       );
     }
 
+    // ✅ Special case: 1 name
     if (names.length === 1) {
-      // Position text off-center (right side)
       const tx = center + radius * 0.5;
       const ty = center;
 
       return (
         <>
-          {/* Full circle */}
           <circle
             cx={center}
             cy={center}
             r={radius}
             fill={COLORS[0]}
+            stroke="white"
+            strokeWidth={4}
           />
 
-          {/* Name label off to the side */}
           <text
             x={tx}
             y={ty}
@@ -93,13 +110,13 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
               textShadow: "0 1px 2px rgba(0,0,0,0.25)",
             }}
           >
-            {names[0].length > 12 ? names[0].slice(0, 11) + "…" : names[0]}
+            {names[0].length > 12
+              ? names[0].slice(0, 11) + "…"
+              : names[0]}
           </text>
         </>
       );
     }
-
-
 
     const segmentAngle = 360 / names.length;
 
@@ -124,16 +141,34 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
 
       const textAngle = (i + 0.5) * segmentAngle;
 
+      const isRemoving = removingIndex === i;
+
       return (
-        <g key={i}>
+<g
+  key={i}
+  style={{
+    transition: "opacity 0.6s ease 0.5s",
+    opacity: isRemoving ? 0 : 1,
+  }}
+>
+
+          {/* Segment */}
           <path
             d={`M ${center} ${center}
-                L ${x1} ${y1}
-                A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}
-                Z`}
+              L ${x1} ${y1}
+              A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}
+              Z`}
             fill={COLORS[i % COLORS.length]}
+            stroke="white"
+            strokeWidth={4}
+              style={{
+    transition: "transform 0.6s ease 0.2s",
+    transform: isRemoving ? "scale(0)" : "scale(1)",
+    transformOrigin: `${center}px ${center}px`,
+  }}
           />
 
+          {/* Text */}
           <text
             x={tx}
             y={ty}
@@ -146,6 +181,9 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
             style={{
               fontFamily: "Fredoka, sans-serif",
               textShadow: "0 1px 2px rgba(0,0,0,0.2)",
+              pointerEvents: "none",
+                  transition: "opacity 0.6s ease 0.2s",
+    opacity: isRemoving ? 0 : 1,
             }}
           >
             {name.length > 10 ? name.slice(0, 9) + "…" : name}
@@ -157,7 +195,7 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* ✅ Pointer (flipped so it points LEFT) */}
+      {/* Pointer */}
       <div
         className="absolute z-10"
         style={{
@@ -188,7 +226,7 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
         style={{
           transform: `rotate(${rotation}deg)`,
           transition: isSpinning
-            ? "transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)"
+            ? "transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99)"
             : "none",
         }}
       >
