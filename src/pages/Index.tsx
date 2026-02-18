@@ -17,16 +17,18 @@ const Index = () => {
   const forbiddenPairs = [
     ["pranavi", "tommy"],
     ["emily", "tommy"],
-    ["emily", "jake"]
+    ["emily", "jake"],
+    ["pranavi", "emily"],
+    ["emily", "evelyn"],
+    ["evelyn", "emily"],
+    ["jake", "nathan"],
+    ["nathan", "arjun"],
+    ["arjun", "jake"],
+    ["kris", "tommy"],
+    ["tommy", "evelyn"],
+    ["arissa", "julia"]
   ];
 
-  // ✅ Check forbidden
-  const isForbidden = (a: string, b: string) => {
-    return forbiddenPairs.some(
-      ([x, y]) =>
-        (x === a && y === b) || (x === b && y === a)
-    );
-  };
 
   // ✅ Get forbidden match for a person
   const getForbiddenMatch = (person: string) => {
