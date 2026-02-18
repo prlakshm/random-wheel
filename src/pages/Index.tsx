@@ -38,19 +38,19 @@ const Index = () => {
     setSpinning(true);
   };
 
-const handleResult = (winner: string) => {
-  // Stop spinning immediately
-  setSpinning(false);
+  const handleResult = (winner: string) => {
+    // Stop spinning immediately
+    setSpinning(false);
 
-  // Remove winner from wheel immediately
-  setNames((prev) => prev.filter((n) => n !== winner));
+    // Remove winner from wheel immediately
+    setNames((prev) => prev.filter((n) => n !== winner));
 
-  // Delay showing overlay (ex: 1 second)
-  setTimeout(() => {
-    setResult(winner);
-    setShowResult(true);
-  }, 120); // ⏳ delay in ms
-};
+    // Delay showing overlay (ex: 1 second)
+    setTimeout(() => {
+      setResult(winner);
+      setShowResult(true);
+    }, 0); // ⏳ delay in ms
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
@@ -68,9 +68,8 @@ const handleResult = (winner: string) => {
       <div className="relative mb-6 flex items-center justify-center">
         {/* Wheel fades when overlay shows */}
         <div
-          className={`transition-opacity duration-500 ${
-            showResult ? "opacity-30" : "opacity-100"
-          }`}
+          className={`transition-opacity duration-500 ${showResult ? "opacity-30" : "opacity-100"
+            }`}
         >
           <SpinWheel
             names={names}
