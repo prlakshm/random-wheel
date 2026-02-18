@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SpinWheel from "@/components/SpinWheel";
 
 const Index = () => {
@@ -13,35 +13,66 @@ const Index = () => {
   // ✅ Pairing system
   const [firstPick, setFirstPick] = useState<string | null>(null);
 
-  // 🚫 Forbidden pairs
-  const forbiddenPairs = [
-    ["pranavi", "tommy"],
-    ["emily", "tommy"],
+  // ✅ Wheel display list
+  const [wheelNames, setWheelNames] = useState<string[]>([]);
+
+  // ✅ Pair queue
+  const [pairQueue, setPairQueue] = useState<[string, string][]>([]);
+
+  // 🚫 Forbidden GROUPS (any 2 inside cannot pair)
+  const forbiddenGroups = [
+    ["jake", "nathan", "arjun"],
+    ["pranavi", "emily", "evelyn", "tommy", "nayani"],
+    ["tommy", "kris", "sid", "edward"],
+    ["arissa", "julia", "anel", "abby"],
     ["emily", "jake"],
-    ["pranavi", "emily"],
-    ["emily", "evelyn"],
-    ["evelyn", "emily"],
-    ["jake", "nathan"],
-    ["nathan", "arjun"],
-    ["arjun", "jake"],
-    ["kris", "tommy"],
-    ["tommy", "evelyn"],
-    ["arissa", "julia"]
+    ["anand", "george"],
+    ["ananya", "george"],
+    ["ananya", "pooja"],
+    ["pranavi", "george"]
   ];
 
+  // ✅ Normalize groups once
+  const normalizedGroups = forbiddenGroups.map((group) =>
+    group.map((name) => name.trim().toLowerCase())
+  );
 
-  // ✅ Get forbidden match for a person
-  const getForbiddenMatch = (person: string) => {
-    const pair = forbiddenPairs.find(
-      ([a, b]) => a === person || b === person
+  // ✅ Check if two people are forbidden
+  const isForbidden = (a: string, b: string) => {
+    const A = a.trim().toLowerCase();
+    const B = b.trim().toLowerCase();
+
+    return normalizedGroups.some(
+      (group) => group.includes(A) && group.includes(B)
     );
-
-    if (!pair) return null;
-
-    return pair[0] === person ? pair[1] : pair[0];
   };
 
-  // ✨ Fancy button
+  // ✅ Compute valid pairs from current names
+  const computePairs = (list: string[]) => {
+    let pairs: [string, string][] = [];
+
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        const a = list[i];
+        const b = list[j];
+
+        if (!isForbidden(a, b)) {
+          pairs.push([a, b]);
+        }
+      }
+    }
+
+    // Shuffle pairs so it feels random
+    return pairs.sort(() => Math.random() - 0.5);
+  };
+
+  // ✅ Recompute queue whenever names change
+  useEffect(() => {
+    setPairQueue(computePairs(names));
+    setWheelNames(names);
+  }, [names]);
+
+  // ✨ Fancy button (UNCHANGED)
   const fancyButton =
     "inline-flex items-center rounded-md font-semibold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 tracking-wide";
 
@@ -61,7 +92,7 @@ const Index = () => {
 
   // ✅ Spin click
   const handleSpin = () => {
-    if (names.length < 2) return;
+    if (pairQueue.length === 0) return;
 
     setShowResult(false);
     setResult(null);
@@ -70,47 +101,46 @@ const Index = () => {
   };
 
   // ✅ Handle wheel result
-const handleResult = (winner: string) => {
-  setSpinning(false);
+  const handleResult = (winner: string) => {
+    setSpinning(false);
 
-  // -------------------
-  // FIRST PICK
-  // -------------------
-  if (!firstPick) {
-    setFirstPick(winner);
+    // -------------------
+    // FIRST PICK
+    // -------------------
+    if (!firstPick) {
+      setFirstPick(winner);
 
-    // Remove first winner from pool
-    setNames((prev) => prev.filter((n) => n !== winner));
+      // Remove first pick from wheel temporarily
+      setWheelNames((prev) => prev.filter((n) => n !== winner && !isForbidden(winner, n)));
 
-    // ✅ AUTO-SPIN AGAIN after a short delay
+      // Auto spin again
+      setTimeout(() => {
+        setSpinning(true);
+      }, 700);
+
+      return;
+    }
+
+    // -------------------
+    // SECOND PICK
+    // -------------------
+    const secondPick = winner;
+
+    setResult(`${firstPick} + ${secondPick}`);
+
+    // Show overlay slightly delayed
     setTimeout(() => {
-      setSpinning(true);
-    }, 700);
+      setShowResult(true);
+    }, 400);
 
-    return;
-  }
+    // Remove both permanently
+    setNames((prev) =>
+      prev.filter((n) => n !== firstPick && n !== secondPick)
+    );
 
-  // -------------------
-  // SECOND PICK
-  // -------------------
-  setResult(`${firstPick} + ${winner}`);
-  setShowResult(true);
-
-  // Remove second winner too
-  setNames((prev) => prev.filter((n) => n !== winner));
-
-  // Reset pairing
-  setFirstPick(null);
-};
-
-
-  // ✅ Filter names BEFORE spinning (auto-avoid forbidden)
-  const filteredNames =
-    firstPick === null
-      ? names
-      : names.filter(
-          (n) => n !== getForbiddenMatch(firstPick)
-        );
+    // Reset
+    setFirstPick(null);
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
@@ -122,20 +152,17 @@ const handleResult = (winner: string) => {
         <p className="mt-2 text-lg text-muted-foreground">
           And let fate decide...
         </p>
-
-  
       </header>
 
       {/* Wheel + Overlay */}
       <div className="relative mb-6 flex items-center justify-center">
         {/* Wheel fades when overlay shows */}
         <div
-          className={`transition-opacity duration-500 ${
-            showResult ? "opacity-30" : "opacity-100"
-          }`}
+          className={`transition-opacity duration-500 ${showResult ? "opacity-30" : "opacity-100"
+            }`}
         >
           <SpinWheel
-            names={filteredNames}
+            names={wheelNames}
             spinning={spinning}
             onResult={handleResult}
           />
@@ -169,7 +196,7 @@ const handleResult = (winner: string) => {
       {/* Spin Button */}
       <button
         onClick={handleSpin}
-        disabled={filteredNames.length < 2 || spinning || firstPick !== null}
+        disabled={names.length < 2 || spinning || firstPick !== null}
         className={`${fancyButton} mb-6 px-10 py-4 text-xl`}
         style={{ background: "var(--gradient-spin)" }}
       >
