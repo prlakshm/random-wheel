@@ -10,25 +10,54 @@ const Index = () => {
 
   const [spinning, setSpinning] = useState(false);
 
-  // Shared fancy button style
+  // ✅ Pairing system
+  const [firstPick, setFirstPick] = useState<string | null>(null);
+
+  // 🚫 Forbidden pairs
+  const forbiddenPairs = [
+    ["pranavi", "tommy"],
+    ["emily", "tommy"],
+    ["emily", "jake"]
+  ];
+
+  // ✅ Check forbidden
+  const isForbidden = (a: string, b: string) => {
+    return forbiddenPairs.some(
+      ([x, y]) =>
+        (x === a && y === b) || (x === b && y === a)
+    );
+  };
+
+  // ✅ Get forbidden match for a person
+  const getForbiddenMatch = (person: string) => {
+    const pair = forbiddenPairs.find(
+      ([a, b]) => a === person || b === person
+    );
+
+    if (!pair) return null;
+
+    return pair[0] === person ? pair[1] : pair[0];
+  };
+
+  // ✨ Fancy button
   const fancyButton =
     "inline-flex items-center rounded-md font-semibold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 tracking-wide";
 
-  // Add name
+  // ✅ Add name
   const addName = () => {
-    const trimmed = inputValue.trim();
+    const trimmed = inputValue.trim().toLowerCase();
     if (!trimmed || names.includes(trimmed)) return;
 
     setNames((prev) => [...prev, trimmed]);
     setInputValue("");
   };
 
-  // Remove manually
+  // ✅ Remove manually
   const removeName = (name: string) => {
     setNames((prev) => prev.filter((n) => n !== name));
   };
 
-  // Spin click
+  // ✅ Spin click
   const handleSpin = () => {
     if (names.length < 2) return;
 
@@ -38,19 +67,48 @@ const Index = () => {
     setSpinning(true);
   };
 
-  const handleResult = (winner: string) => {
-    // Stop spinning immediately
-    setSpinning(false);
+  // ✅ Handle wheel result
+const handleResult = (winner: string) => {
+  setSpinning(false);
 
-    // Remove winner from wheel immediately
+  // -------------------
+  // FIRST PICK
+  // -------------------
+  if (!firstPick) {
+    setFirstPick(winner);
+
+    // Remove first winner from pool
     setNames((prev) => prev.filter((n) => n !== winner));
 
-    // Delay showing overlay (ex: 1 second)
+    // ✅ AUTO-SPIN AGAIN after a short delay
     setTimeout(() => {
-      setResult(winner);
-      setShowResult(true);
-    }, 0); // ⏳ delay in ms
-  };
+      setSpinning(true);
+    }, 700);
+
+    return;
+  }
+
+  // -------------------
+  // SECOND PICK
+  // -------------------
+  setResult(`${firstPick} + ${winner}`);
+  setShowResult(true);
+
+  // Remove second winner too
+  setNames((prev) => prev.filter((n) => n !== winner));
+
+  // Reset pairing
+  setFirstPick(null);
+};
+
+
+  // ✅ Filter names BEFORE spinning (auto-avoid forbidden)
+  const filteredNames =
+    firstPick === null
+      ? names
+      : names.filter(
+          (n) => n !== getForbiddenMatch(firstPick)
+        );
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
@@ -60,19 +118,22 @@ const Index = () => {
           Spin the Wheel!
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Let fate decide your next pairing ✨
+          And let fate decide...
         </p>
+
+  
       </header>
 
       {/* Wheel + Overlay */}
       <div className="relative mb-6 flex items-center justify-center">
         {/* Wheel fades when overlay shows */}
         <div
-          className={`transition-opacity duration-500 ${showResult ? "opacity-30" : "opacity-100"
-            }`}
+          className={`transition-opacity duration-500 ${
+            showResult ? "opacity-30" : "opacity-100"
+          }`}
         >
           <SpinWheel
-            names={names}
+            names={filteredNames}
             spinning={spinning}
             onResult={handleResult}
           />
@@ -81,7 +142,22 @@ const Index = () => {
         {/* Winner Overlay */}
         {showResult && result && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-bounce rounded-2xl bg-primary px-8 py-6 text-3xl font-bold tracking-wide text-white/90 shadow-2xl backdrop-blur-md">
+            <div
+              className="
+                animate-bounce
+                rounded-2xl
+                bg-primary
+                px-10
+                py-6
+                text-3xl
+                font-bold
+                text-white
+                shadow-2xl
+                backdrop-blur-md
+                text-center
+                whitespace-nowrap
+              "
+            >
               🎉 {result}! 🎉
             </div>
           </div>
@@ -91,7 +167,7 @@ const Index = () => {
       {/* Spin Button */}
       <button
         onClick={handleSpin}
-        disabled={names.length < 2 || spinning}
+        disabled={filteredNames.length < 2 || spinning || firstPick !== null}
         className={`${fancyButton} mb-6 px-10 py-4 text-xl`}
         style={{ background: "var(--gradient-spin)" }}
       >
@@ -125,7 +201,7 @@ const Index = () => {
           {names.map((name) => (
             <span
               key={name}
-              className="flex items-center gap-2 rounded-full border border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 px-4 py-1 text-sm font-medium shadow-sm transition-all hover:scale-105"
+              className="flex items-center gap-2 rounded-full border border-primary/20 bg-gradient-to-br from-primary/10 to-secondary/10 px-4 py-1 text-sm font-medium shadow-sm transition-all hover:scale-105 capitalize"
             >
               {name}
               <button
