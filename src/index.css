@@ -1,9 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 
 @layer base {
   :root {
@@ -44,8 +43,17 @@
     --wheel-5: 280 50% 65%;
     --wheel-6: 20 80% 65%;
 
-    --gradient-bg: linear-gradient(180deg, hsl(270 60% 95%), hsl(330 50% 95%), hsl(270 50% 97%));
-    --gradient-spin: linear-gradient(135deg, hsl(330 80% 65%), hsl(270 60% 65%));
+    --gradient-bg: linear-gradient(
+      180deg,
+      hsl(270 60% 95%),
+      hsl(330 50% 95%),
+      hsl(270 50% 97%)
+    );
+    --gradient-spin: linear-gradient(
+      135deg,
+      hsl(330 80% 65%),
+      hsl(270 60% 65%)
+    );
   }
 }
 
@@ -55,13 +63,17 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Fredoka', sans-serif;
+    font-family: "Fredoka", sans-serif;
     background: var(--gradient-bg);
     min-height: 100vh;
   }
 }
 
 @keyframes spin-wheel {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(var(--spin-to)); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--spin-to));
+  }
 }

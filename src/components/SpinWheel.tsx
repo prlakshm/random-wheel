@@ -147,7 +147,7 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
 <g
   key={i}
   style={{
-    transition: "opacity 0.6s ease 0.5s",
+    transition: "opacity 0.6s ease-in 0.5s",
     opacity: isRemoving ? 0 : 1,
   }}
 >
@@ -162,7 +162,7 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
             stroke="white"
             strokeWidth={4}
               style={{
-    transition: "transform 0.6s ease 0.2s",
+    transition: "transform 0.6s ease-in 0.2s",
     transform: isRemoving ? "scale(0)" : "scale(1)",
     transformOrigin: `${center}px ${center}px`,
   }}
@@ -182,7 +182,7 @@ const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
               fontFamily: "Fredoka, sans-serif",
               textShadow: "0 1px 2px rgba(0,0,0,0.2)",
               pointerEvents: "none",
-                  transition: "opacity 0.6s ease 0.2s",
+                  transition: "opacity 0.6s ease-in 0.2s",
     opacity: isRemoving ? 0 : 1,
             }}
           >

@@ -38,17 +38,19 @@ const Index = () => {
     setSpinning(true);
   };
 
-  // When wheel selects winner
-  const handleResult = (winner: string) => {
+const handleResult = (winner: string) => {
+  // Stop spinning immediately
+  setSpinning(false);
+
+  // Remove winner from wheel immediately
+  setNames((prev) => prev.filter((n) => n !== winner));
+
+  // Delay showing overlay (ex: 1 second)
+  setTimeout(() => {
     setResult(winner);
     setShowResult(true);
-
-    // Remove winner from wheel
-    setNames((prev) => prev.filter((n) => n !== winner));
-
-    // Stop spinning trigger
-    setSpinning(false);
-  };
+  }, 120); // ⏳ delay in ms
+};
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 py-10">
