@@ -24,6 +24,7 @@ const Index = () => {
     ["anand", "george"],
     ["ananya", "george"],
     ["ananya", "pooja"],
+    ["pranavi", "george"],
     ["george", "carmen"],
   ];
 
@@ -40,27 +41,10 @@ const Index = () => {
 const computePairs = (list: string[]) => {
   let pairs: [string, string][] = [];
 
-  // 💍 Always lock Jake + Pranavi together
-  const hasJake = list.includes("jake");
-  const hasPranavi = list.includes("pranavi");
-
-  // Create a working list without them
-  let filteredList = [...list];
-
-  if (hasJake && hasPranavi) {
-    pairs.push(["jake", "pranavi"]);
-
-    // Remove them so they NEVER pair with anyone else
-    filteredList = filteredList.filter(
-      (n) => n !== "jake" && n !== "pranavi"
-    );
-  }
-
-  // Build all other valid pairs normally
-  for (let i = 0; i < filteredList.length; i++) {
-    for (let j = i + 1; j < filteredList.length; j++) {
-      const a = filteredList[i];
-      const b = filteredList[j];
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const a = list[i];
+      const b = list[j];
 
       if (!isForbidden(a, b)) {
         pairs.push([a, b]);
@@ -68,7 +52,6 @@ const computePairs = (list: string[]) => {
     }
   }
 
-  // 🎲 Shuffle everything EXCEPT the locked couple stays included
   const shuffled = pairs.sort(() => Math.random() - 0.5);
 
   console.log(
