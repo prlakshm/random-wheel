@@ -13,56 +13,58 @@ interface SpinWheelProps {
   names: string[];
   spinning: boolean;
   onResult: (name: string) => void;
+  targetName?: string | null;   // 👈 ADD THIS
 }
 
-const SpinWheel = ({ names, spinning, onResult }: SpinWheelProps) => {
+const SpinWheel = ({ names, spinning, onResult, targetName }: SpinWheelProps)  => {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  // ⭐ New: animate removal
+  // ⭐ Animate removal
   const [removingIndex, setRemovingIndex] = useState<number | null>(null);
 
   const size = 320;
   const center = size / 2;
   const radius = size / 2 - 10;
 
-  // ✅ Spin logic
+  // ✅ Spin logic (fixed landing)
   const spinWheel = useCallback(() => {
     if (isSpinning || names.length < 2) return;
 
     setIsSpinning(true);
 
-    const extraSpins = 5 + Math.random() * 5;
-    const randomAngle = Math.random() * 360;
-    const totalRotation = rotation + extraSpins * 360 + randomAngle;
+    const segmentAngle = 360 / names.length;
+    // Use targetName if provided, otherwise random
+    const chosenIndex =
+      targetName && names.includes(targetName)
+        ? names.indexOf(targetName)
+        : Math.floor(Math.random() * names.length);
+
+    // Midpoint of the winning segment in CSS-rotation space (0 = top, clockwise)
+    const winnerCenter = (chosenIndex + 0.5) * segmentAngle;
+
+    // Pointer is at 90° (right side)
+    const targetAngle = 90 - winnerCenter;
+
+    // How much MORE we need to rotate from current position to hit targetAngle
+    const currentMod = ((rotation % 360) + 360) % 360;
+    const diff = ((targetAngle - currentMod + 360) % 360);
+
+    const totalRotation = rotation + diff + 6 * 360;
 
     setRotation(totalRotation);
 
-setTimeout(() => {
-  const finalAngle = totalRotation % 360;
-  const segmentAngle = 360 / names.length;
+    setTimeout(() => {
+      const winner = names[chosenIndex];
+      setRemovingIndex(chosenIndex);
 
-  const pointerAngle = (360 - finalAngle + 90) % 360;
-  const idx = Math.floor(pointerAngle / segmentAngle) % names.length;
-
-  const winner = names[idx];
-
-  // ✅ Start fade-out slightly early
-  setTimeout(() => {
-    setRemovingIndex(idx);
-  }, 300); // starts ~0.3s before stop
-
-  // ✅ Fully finish after fade
-  setTimeout(() => {
-    onResult(winner);
-    setRemovingIndex(null);
-    setIsSpinning(false);
-  }, 900);
-
-}, 4000);
-
+      setTimeout(() => {
+        onResult(winner);
+        setRemovingIndex(null);
+        setIsSpinning(false);
+      }, 900);
+    }, 4000);
   }, [isSpinning, names, rotation, onResult]);
-
   // ✅ Trigger spin when parent sets spinning=true
   useEffect(() => {
     if (spinning && !isSpinning) {
@@ -70,17 +72,11 @@ setTimeout(() => {
     }
   }, [spinning, isSpinning, spinWheel]);
 
-
-  // ✅ Render wheel segments
+  // ✅ Render wheel segments (UNCHANGED)
   const renderSegments = () => {
     if (names.length === 0) {
       return (
-        <circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="#eee"
-        />
+        <circle cx={center} cy={center} r={radius} fill="#eee" />
       );
     }
 
@@ -125,7 +121,8 @@ setTimeout(() => {
 
     return names.map((name, i) => {
       const startAngle = (i * segmentAngle - 90) * (Math.PI / 180);
-      const endAngle = ((i + 1) * segmentAngle - 90) * (Math.PI / 180);
+      const endAngle =
+        ((i + 1) * segmentAngle - 90) * (Math.PI / 180);
 
       const x1 = center + radius * Math.cos(startAngle);
       const y1 = center + radius * Math.sin(startAngle);
@@ -154,7 +151,6 @@ setTimeout(() => {
             opacity: isRemoving ? 0 : 1,
           }}
         >
-
           {/* Segment */}
           <path
             d={`M ${center} ${center}
@@ -198,7 +194,7 @@ setTimeout(() => {
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Pointer */}
+      {/* Pointer (UNCHANGED + FLIPPED) */}
       <div
         className="absolute z-10"
         style={{
@@ -220,7 +216,7 @@ setTimeout(() => {
         </svg>
       </div>
 
-      {/* Wheel */}
+      {/* Wheel UI (UNCHANGED) */}
       <svg
         width={size}
         height={size}
