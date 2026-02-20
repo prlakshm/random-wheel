@@ -23,6 +23,8 @@ const Index = () => {
     ["emily", "jake"],
     ["nayani", "jake"],
     ["anel", "anand"],
+    ["nayani", "arjun"],
+    ["anel", "arjun"],
     ["anand", "george"],
     ["ananya", "george"],
     ["ananya", "pooja"],
